@@ -40,8 +40,8 @@ CmpOptions             := -g -fPIC $(Preprocessors)
 LinkOptions            :=  
 IncludePath            :=  "$(IncludeSwitch)." "$(IncludeSwitch)." "$(IncludeSwitch)/usr/include" "$(IncludeSwitch)/usr/include/lua5.1" 
 RcIncludePath          :=
-Libs                   :=$(LibrarySwitch)lua5.1 $(LibrarySwitch)newt 
-LibPath                := "$(LibraryPathSwitch)." "$(LibraryPathSwitch)/usr/lib/x86_64-linux-gnu" 
+Libs                   :=$(LibrarySwitch)newt 
+LibPath                := "$(LibraryPathSwitch)." 
 
 
 ##

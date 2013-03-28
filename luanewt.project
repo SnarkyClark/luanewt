@@ -8,6 +8,14 @@
   <VirtualDirectory Name="include">
     <File Name="luanewt.h"/>
   </VirtualDirectory>
+  <VirtualDirectory Name="tests">
+    <File Name="test2.lua"/>
+    <File Name="test1.lua"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="luanewt">
+    <File Name=".gitignore"/>
+    <File Name="Makefile"/>
+  </VirtualDirectory>
   <Settings Type="Dynamic Library">
     <Configuration Name="Debug" CompilerType="gnu g++" DebuggerType="GNU gdb debugger" Type="Dynamic Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
       <Compiler Options="-g -fPIC" Required="yes" PreCompiledHeader="">
@@ -16,8 +24,6 @@
         <IncludePath Value="/usr/include/lua5.1"/>
       </Compiler>
       <Linker Options="" Required="yes">
-        <LibraryPath Value="/usr/lib/x86_64-linux-gnu"/>
-        <Library Value="lua5.1"/>
         <Library Value="newt"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
@@ -83,8 +89,4 @@
       <ResourceCompiler Options=""/>
     </GlobalSettings>
   </Settings>
-  <VirtualDirectory Name="tests">
-    <File Name="test2.lua"/>
-    <File Name="test1.lua"/>
-  </VirtualDirectory>
 </CodeLite_Project>
