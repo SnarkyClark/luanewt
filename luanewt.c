@@ -77,8 +77,10 @@ static const luaL_Reg R_comp_methods[] = {
 	{"AddComponents", L_AddComponents},
 	{"Clear", L_Clear},
 	{"Destroy", L_Destroy},
-
+	{"GetValue", L_GetValue},
 	{"Run", L_Run},
+	{"Set", L_Set},
+	{"SetText", L_SetText},
 	{"TakesFocus", L_TakesFocus},
 	
 	{NULL, NULL}
@@ -221,11 +223,10 @@ LUALIB_API int L_CenteredWindow(lua_State *L) {
 	const char *title;
 	width = luaL_checkinteger(L, 1);
 	height = luaL_checkinteger(L, 2);
-	if ((lua_gettop(L) < 3) || (lua_isnil(L, 3) == 1)) {
-		title = NULL;
-	} else {
-		title = luaL_checkstring(L, 3);
-	}
+
+	if ((lua_gettop(L) < 3) || (lua_isnil(L, 3) == 1)) title = NULL;
+	else title = luaL_checkstring(L, 3);
+
 	result = newtCenteredWindow(width, height, title);
 	return 0;
 }
@@ -239,11 +240,10 @@ LUALIB_API int L_PopWindow(lua_State *L) {
 /* PushHelpLine([text]) */
 LUALIB_API int L_PushHelpLine(lua_State *L) {
 	const char *text;
-	if ((lua_gettop(L) < 1) || (lua_isnil(L, 1) == 1)) {
-		text = NULL;
-	} else {
-		text = luaL_checkstring(L, 1);
-	}
+
+	if ((lua_gettop(L) < 1) || (lua_isnil(L, 1) == 1)) text = NULL;
+	else text = luaL_checkstring(L, 1);
+
 	newtPushHelpLine(text);	
 	return 0;
 }
@@ -309,6 +309,7 @@ LUALIB_API int L_ReflowText(lua_State *L) {
 
 /* widget functions */
 
+/* com = Button(left, top, text) */
 LUALIB_API int L_Button(lua_State *L) {
 	newtComponent result;
 	int left; int top; 
@@ -321,6 +322,7 @@ LUALIB_API int L_Button(lua_State *L) {
 	return 1;
 }
 
+/* com = CompactButton(left, top, text) */
 LUALIB_API int L_CompactButton(lua_State *L) {
 	newtComponent result;
 	int left; int top; 
@@ -337,40 +339,63 @@ LUALIB_API int L_Checkbox(lua_State *L) {
 	return 0;
 }
 
+/* com = Entry(left, top, value, width, [flags])*/
 LUALIB_API int L_Entry(lua_State *L) {
-	return 0;
+	int left; int top;
+	const char *value;
+	int width; int flags;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	
+	if (lua_isnil(L, 3) == 1) value = NULL;
+	else value = luaL_checkstring(L, 3);
+	
+	width = luaL_checkinteger(L, 4);
+	
+	if (lua_gettop(L) < 5 || lua_isnil(L, 5) == 1) flags = 0;
+	else flags = luaL_checkinteger(L, 5);
+	
+	result = newtEntry(left, top, value, width, NULL, flags);
+	lua_pushcomponent(L, result, TYPE_ENTRY);
+	return 1;
 }
 
-/* Form(vertBar, help, flags) */
+/* com = Form([vertBar], [help], [flags]) */
 LUALIB_API int L_Form(lua_State *L) {
 	newtComponent vertBar;
 	const char *help;
 	int flags;
 	newtComponent result;
 	
-	if (lua_isnil(L, 1)) {
-		vertBar = NULL;
-	} else {
-		vertBar = luaL_checkcomponent(L, 1)->p;
-	}
-	if (lua_isnil(L, 2)) {
-		help = NULL;
-	} else {
-		help = luaL_checkstring(L, 2);
-	}
-	if (lua_isnil(L, 3)) {
-		flags = 0;		
-	} else {
-		flags = luaL_checkinteger(L, 3);
-	}
+	if (lua_gettop(L) < 1 || lua_isnil(L, 1) == 1) vertBar = NULL;
+	else vertBar = luaL_checkcomponent(L, 1)->p;
+
+	if (lua_gettop(L) < 2 || lua_isnil(L, 2) == 1) help = NULL;
+	else help = luaL_checkstring(L, 2);
+
+	if (lua_gettop(L) < 3 || lua_isnil(L, 3) == 1) flags = 0;		
+	else flags = luaL_checkinteger(L, 3);
 	
 	result = newtForm(vertBar, (void *)help, flags);
 	lua_pushcomponent(L, result, TYPE_FORM);
 	return 1;
 }
 
+/* com = Label(left, top, text) */
 LUALIB_API int L_Label(lua_State *L) {
-	return 0;
+	int left; int top;
+	const char *text;
+	newtComponent result;
+
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	text = luaL_checkstring(L, 3);
+	
+	result = newtLabel(left, top, text);
+	lua_pushcomponent(L, result, TYPE_LABEL);
+	return 1;
 }
 
 LUALIB_API int L_Textbox(lua_State *L) {
@@ -428,6 +453,7 @@ LUALIB_API int L_AppendEntry(lua_State *L) {
 	return 0;
 }
 
+/* listbox:Clear() */
 LUALIB_API int L_Clear(lua_State *L) {
 	component com;
 	com = luaL_checkcomponent(L, 1);
@@ -436,22 +462,52 @@ LUALIB_API int L_Clear(lua_State *L) {
 	return 0;
 }
 
+/* com:TakesFocus(bool) */
 LUALIB_API int L_TakesFocus(lua_State *L) {
 	component com;
 	int val;
 	com = luaL_checkcomponent(L, 1);
-	if (lua_gettop(L) > 1) val = lua_toboolean(L, 2);
-	else val = 1;
+	
+	if (lua_gettop(L) < 2) val = true;
+	else val = lua_toboolean(L, 2);
+	
 	newtComponentTakesFocus(com->p, val);
 	return 0;
 }
 
+/* entry:Set(value, [cursoratend]) */
 LUALIB_API int L_Set(lua_State *L) {
+	component com;
+	const char *svalue;
+	bool cursoratend;
+	
+	com = luaL_checkcomponent(L, 1);
+	switch (com->t) {
+		case TYPE_ENTRY:
+			svalue = luaL_checkstring(L, 2);
+			if (lua_gettop(L) < 3) cursoratend = false;
+			else cursoratend = lua_toboolean(L, 3);
+			newtEntrySet(com->p, svalue, cursoratend);
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
 	return 0;	
 }
 
+/* value = entry:GetValue() */
 LUALIB_API int L_GetValue(lua_State *L) {
-	return 0;
+	component com;
+
+	com = luaL_checkcomponent(L, 1);
+	switch (com->t) {
+		case TYPE_ENTRY:
+			lua_pushstring(L, newtEntryGetValue(com->p));
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
+	return 1;
 }
 
 LUALIB_API int L_SetValue(lua_State *L) {
@@ -462,7 +518,7 @@ LUALIB_API int L_GetCurrent(lua_State *L) {
 	return 0;
 }
 
-/* reason, value = Run() */
+/* reason, value = form:Run() */
 LUALIB_API int L_Run(lua_State *L) {
 	component form; 
 	struct newtExitStruct result;
@@ -498,7 +554,19 @@ LUALIB_API int L_Destroy(lua_State *L) {
 	return 0;
 }
 
-LUALIB_API int L_LabelSetText(lua_State *L) {
+/* label:SetText(text) */
+LUALIB_API int L_SetText(lua_State *L) {
+	component com;
+	const char *text;
+	com = luaL_checkcomponent(L, 1);
+	text = luaL_checkstring(L, 2);
+	switch (com->t) {
+		case TYPE_LABEL:
+			newtLabelSetText(com->p, text);
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
 	return 0;
 }
 
