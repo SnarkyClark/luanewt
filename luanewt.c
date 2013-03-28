@@ -462,16 +462,70 @@ LUALIB_API int L_Clear(lua_State *L) {
 	return 0;
 }
 
-/* com:TakesFocus(bool) */
-LUALIB_API int L_TakesFocus(lua_State *L) {
+LUALIB_API int L_ClearSelection(lua_State *L) {
+	return 0;
+}
+
+LUALIB_API int L_DeleteEntry(lua_State *L) {
+	return 0;
+}
+
+LUALIB_API int L_Destroy(lua_State *L) {
+	component form;
+	form = luaL_checkcomponent(L, 1);
+	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method"); 
+	newtFormDestroy(form->p);
+	return 0;
+}
+
+LUALIB_API int L_GetCurrent(lua_State *L) {
+	return 0;
+}
+
+LUALIB_API int L_GetSelection(lua_State *L) {
+	return 0;
+}
+
+LUALIB_API int L_GetNumLines(lua_State *L) {
+	return 0;
+}
+
+/* value = entry:GetValue() */
+LUALIB_API int L_GetValue(lua_State *L) {
 	component com;
-	int val;
+
 	com = luaL_checkcomponent(L, 1);
-	
-	if (lua_gettop(L) < 2) val = true;
-	else val = lua_toboolean(L, 2);
-	
-	newtComponentTakesFocus(com->p, val);
+	switch (com->t) {
+		case TYPE_ENTRY:
+			lua_pushstring(L, newtEntryGetValue(com->p));
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
+	return 1;
+}
+
+LUALIB_API int L_InsertEntry(lua_State *L) {
+	return 0;
+}
+
+/* reason, value = form:Run() */
+LUALIB_API int L_Run(lua_State *L) {
+	component form; 
+	struct newtExitStruct result;
+	form = luaL_checkcomponent(L, 1);
+	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method");
+	newtFormRun(form->p, &result);
+	lua_pushinteger(L, (int)result.reason);
+	if (result.reason == NEWT_EXIT_COMPONENT) {
+		lua_pushcomponent(L, result.u.co, TYPE_UNKNOWN);
+	} else {
+		lua_pushinteger(L, result.u.key);
+	}
+	return 2;
+}
+
+LUALIB_API int L_SelectItem(lua_State *L) {
 	return 0;
 }
 
@@ -495,43 +549,8 @@ LUALIB_API int L_Set(lua_State *L) {
 	return 0;	
 }
 
-/* value = entry:GetValue() */
-LUALIB_API int L_GetValue(lua_State *L) {
-	component com;
-
-	com = luaL_checkcomponent(L, 1);
-	switch (com->t) {
-		case TYPE_ENTRY:
-			lua_pushstring(L, newtEntryGetValue(com->p));
-			break;
-		default:
-			return luaL_error(L, "Invalid Method");
-	}
-	return 1;
-}
-
 LUALIB_API int L_SetValue(lua_State *L) {
 	return 0;
-}
-
-LUALIB_API int L_GetCurrent(lua_State *L) {
-	return 0;
-}
-
-/* reason, value = form:Run() */
-LUALIB_API int L_Run(lua_State *L) {
-	component form; 
-	struct newtExitStruct result;
-	form = luaL_checkcomponent(L, 1);
-	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method");
-	newtFormRun(form->p, &result);
-	lua_pushinteger(L, (int)result.reason);
-	if (result.reason == NEWT_EXIT_COMPONENT) {
-		lua_pushcomponent(L, result.u.co, TYPE_UNKNOWN);
-	} else {
-		lua_pushinteger(L, result.u.key);
-	}
-	return 2;
 }
 
 LUALIB_API int L_SetBackground(lua_State *L) {
@@ -543,14 +562,6 @@ LUALIB_API int L_SetHeight(lua_State *L) {
 }
 
 LUALIB_API int L_SetTimer(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_Destroy(lua_State *L) {
-	component form;
-	form = luaL_checkcomponent(L, 1);
-	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method"); 
-	newtFormDestroy(form->p);
 	return 0;
 }
 
@@ -570,51 +581,18 @@ LUALIB_API int L_SetText(lua_State *L) {
 	return 0;
 }
 
-/* newt.Textbox object */
-LUALIB_API int L_TextboxSetText(lua_State *L) {
+/* com:TakesFocus(bool) */
+LUALIB_API int L_TakesFocus(lua_State *L) {
+	component com;
+	int val;
+	com = luaL_checkcomponent(L, 1);
+	
+	if (lua_gettop(L) < 2) val = true;
+	else val = lua_toboolean(L, 2);
+	
+	newtComponentTakesFocus(com->p, val);
 	return 0;
 }
 
-LUALIB_API int L_TextboxGetNumLines(lua_State *L) {
-	return 0;
-}
 
-LUALIB_API int L_ListboxDeleteEntry(lua_State *L) {
-	return 0;
-}
 
-LUALIB_API int L_ListboxInsertEntry(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxSetEntry(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxSetWidth(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxSetCurrent(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxSetCurrentByKey(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxGetCurrent(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxGetSelection(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxClearSelection(lua_State *L) {
-	return 0;
-}
-
-LUALIB_API int L_ListboxSelectItem(lua_State *L) {
-	return 0;
-}

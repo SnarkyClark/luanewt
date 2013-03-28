@@ -19,9 +19,6 @@
 #define TYPE_LABEL 4
 #define TYPE_LISTBOX 5
 
-#define lua_boxpointer(L, u) (*(void **)(lua_newuserdata(L, sizeof(void *))) = (u))
-#define lua_unboxpointer(L, i) (*(void **)(lua_touserdata(L, i)))
-
 #define lua_newncom(L) ((component)(lua_newuserdata(L, sizeof(struct com_t))))
 #define lua_toncom(L, i) ((component)(lua_touserdata(L, i)))
 
