@@ -1,34 +1,32 @@
 # makefile for luanewt
 
-# Lua setup
 # BSD
-#LUA= /usr/local
-#LUAINC= $(LUA)/include/lua51
-#LUALIB= $(LUA)/lib/lua51
+#PREFIX = /usr/local
+# Linux
+PREFIX = /usr
 
-# Ubuntu
-LUA= /usr
-LUAINC= $(LUA)/include/lua5.1
-LUALIB= $(LUA)/lib
-LUABIN= $(LUA)/bin
+# BSD
+#LUAINC= $(PREFIX)/include/lua51
+# Linux
+LUAINC= $(PREFIX)/include/lua5.1
+
+LUABIN= $(PREFIX)/bin
 
 # libnewt setup
-LNEWT= /usr/local
-LNEWTINC= $(LNEWT)/include
-LNEWTLIB= $(LNEWT)/lib
+LNEWTINC= $(PREFIX)/include
+LNEWTLIB= $(PREFIX)/lib
  
 # probably no need to change anything below here
 CC= gcc
 CFLAGS= $(INCS) $(WARN) -O2 -fPIC $G
 WARN= -ansi -pedantic -Wall
 INCS= -I$(LUAINC) -I$(LNEWTINC)
-LIBS= -L$(LUALIB) -L$(LNEWTLIB) -lnewt
+LIBS= -L$(LNEWTLIB) -lnewt
 
 MYNAME= newt
 MYLIB= lua$(MYNAME)
 
 OBJS= $(MYLIB).o
-#STATIC_OBJS= foobar.o
 T= $(MYNAME).so
 
 all:	so
