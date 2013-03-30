@@ -12,12 +12,14 @@
 
 #define TYPE_COMPONENT "Newt.Component"
 
+#define TYPE_FORM -1
 #define TYPE_UNKNOWN 0
-#define TYPE_ENTRY 1
-#define TYPE_BUTTON 2
-#define TYPE_FORM 3
-#define TYPE_LABEL 4
-#define TYPE_LISTBOX 5
+#define TYPE_LABEL 1
+#define TYPE_ENTRY 2
+#define TYPE_BUTTON 3
+#define TYPE_CHECKBOX 4
+#define TYPE_RADIOBUTTON 5
+#define TYPE_LISTBOX 6
 
 #define lua_newncom(L) ((component)(lua_newuserdata(L, sizeof(struct com_t))))
 #define lua_toncom(L, i) ((component)(lua_touserdata(L, i)))
@@ -31,6 +33,7 @@
 struct com_t {
 	newtComponent p;
 	int t;
+	char tag[21];
 };
 
 typedef struct com_t * component;

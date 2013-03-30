@@ -89,7 +89,7 @@ static const luaL_Reg R_comp_methods[] = {
 /* open the library - used by require() */
 LUALIB_API int luaopen_newt(lua_State *L) {
 	
-	/* register the base functions and module tags */
+	/* register the base functions and module flags */
 	luaL_register(L, "newt", R_newt_functions);
 	
 	lua_pushliteral(L, MYVERSION);
@@ -134,6 +134,7 @@ LUALIB_API int luaopen_newt(lua_State *L) {
 	lua_pushinteger(L, NEWT_EXIT_TIMER);
 	lua_setfield(L, -2, "EXIT_TIMER");
 	
+	/* Newt.Component type & methods */
 	luaL_newmetatable(L, TYPE_COMPONENT); 
 	lua_pushvalue(L, -1); 
 	lua_setfield(L, -2, "__index");
@@ -294,7 +295,7 @@ LUALIB_API int L_Bell(lua_State *L) {
 	return 0;
 }
 
-/* number, number GetScreenSize() */
+/* cols, rows = GetScreenSize() */
 LUALIB_API int L_GetScreenSize(lua_State *L) {
 	int cols; int rows;
 	newtGetScreenSize(&cols, &rows);
@@ -314,9 +315,11 @@ LUALIB_API int L_Button(lua_State *L) {
 	newtComponent result;
 	int left; int top; 
 	const char *text;
+	
 	left = luaL_checkinteger(L, 1);
 	top = luaL_checkinteger(L, 2);
 	text = luaL_checkstring(L, 3);
+	
 	result = newtButton(left, top, text);
 	lua_pushcomponent(L, result, TYPE_BUTTON);
 	return 1;
@@ -324,19 +327,36 @@ LUALIB_API int L_Button(lua_State *L) {
 
 /* com = CompactButton(left, top, text) */
 LUALIB_API int L_CompactButton(lua_State *L) {
-	newtComponent result;
 	int left; int top; 
 	const char *text;
+	newtComponent result;
+
 	left = luaL_checkinteger(L, 1);
 	top = luaL_checkinteger(L, 2);
 	text = luaL_checkstring(L, 3);
+
 	result = newtCompactButton(left, top, text);
 	lua_pushcomponent(L, result, TYPE_BUTTON);
 	return 1;
 }
 
+/* com = Checkbox(left, top, text, [checked]) */
 LUALIB_API int L_Checkbox(lua_State *L) {
-	return 0;
+	int left; int top;
+	const char *text;
+	bool checked;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	text = luaL_checkstring(L, 3);
+	if (lua_gettop(L) < 4 || lua_isnil(L, 4) == 1) checked = false;
+	else checked = lua_toboolean(L, 4);
+	
+	if (checked == false) result = newtCheckbox(left, top, text, ' ', " *", NULL);
+	else result = newtCheckbox(left, top, text, '*', " *", NULL);
+	lua_pushcomponent(L, result, TYPE_CHECKBOX);
+	return 1;
 }
 
 /* com = Entry(left, top, value, width, [flags])*/
@@ -344,16 +364,14 @@ LUALIB_API int L_Entry(lua_State *L) {
 	int left; int top;
 	const char *value;
 	int width; int flags;
+	const char *tag;
 	newtComponent result;
 	
 	left = luaL_checkinteger(L, 1);
 	top = luaL_checkinteger(L, 2);
-	
 	if (lua_isnil(L, 3) == 1) value = NULL;
 	else value = luaL_checkstring(L, 3);
-	
 	width = luaL_checkinteger(L, 4);
-	
 	if (lua_gettop(L) < 5 || lua_isnil(L, 5) == 1) flags = 0;
 	else flags = luaL_checkinteger(L, 5);
 	
@@ -371,10 +389,8 @@ LUALIB_API int L_Form(lua_State *L) {
 	
 	if (lua_gettop(L) < 1 || lua_isnil(L, 1) == 1) vertBar = NULL;
 	else vertBar = luaL_checkcomponent(L, 1)->p;
-
 	if (lua_gettop(L) < 2 || lua_isnil(L, 2) == 1) help = NULL;
 	else help = luaL_checkstring(L, 2);
-
 	if (lua_gettop(L) < 3 || lua_isnil(L, 3) == 1) flags = 0;		
 	else flags = luaL_checkinteger(L, 3);
 	
@@ -410,8 +426,30 @@ LUALIB_API int L_Listbox(lua_State *L) {
 	return 0;
 }
 
+/* com = Radiobutton(left, top, text, [selected], [prev]) */
 LUALIB_API int L_Radiobutton(lua_State *L) {
-	return 0;
+	int left; int top;
+	const char *text;
+	bool selected;
+	component com;
+	newtComponent prev;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	text = luaL_checkstring(L, 3);
+	if (lua_gettop(L) < 4 || lua_isnil(L, 4) == 1) selected = false;
+	else selected = lua_toboolean(L, 4);
+	if (lua_gettop(L) < 5 || lua_isnil(L, 5) == 1) prev = NULL;
+	else {
+		com = luaL_checkcomponent(L, 5);
+		if (com->t != TYPE_RADIOBUTTON) return luaL_error(L, "Previous component must be a Radiobutton");
+		prev = com->p;
+	}
+	
+	result = newtRadiobutton(left, top, text, selected, prev);
+	lua_pushcomponent(L, result, TYPE_RADIOBUTTON);
+	return 1;	
 }
 
 LUALIB_API int L_Scale(lua_State *L) {
@@ -478,7 +516,9 @@ LUALIB_API int L_Destroy(lua_State *L) {
 	return 0;
 }
 
+/* com = radiobutton:GetCurrent() */
 LUALIB_API int L_GetCurrent(lua_State *L) {
+
 	return 0;
 }
 
