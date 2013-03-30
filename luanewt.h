@@ -20,6 +20,7 @@
 #define TYPE_CHECKBOX 4
 #define TYPE_RADIOBUTTON 5
 #define TYPE_LISTBOX 6
+#define TYPE_SCALE 7
 
 #define lua_newncom(L) ((component)(lua_newuserdata(L, sizeof(struct com_t))))
 #define lua_toncom(L, i) ((component)(lua_touserdata(L, i)))
@@ -33,7 +34,6 @@
 struct com_t {
 	newtComponent p;
 	int t;
-	char tag[21];
 };
 
 typedef struct com_t * component;
@@ -48,7 +48,6 @@ LUALIB_API int luaopen_newt(lua_State *L);
 /* root functions */
 LUALIB_API int L_Init(lua_State *L);
 LUALIB_API int L_Cls(lua_State *L);
-LUALIB_API int L_Compare(lua_State *L);
 LUALIB_API int L_WaitForKey(lua_State *L);
 LUALIB_API int L_ClearKeyBuffer(lua_State *L);
 LUALIB_API int L_DrawRootText(lua_State *L);
@@ -95,6 +94,7 @@ LUALIB_API int L_GetSelection(lua_State *L);
 LUALIB_API int L_GetNumLines(lua_State *L);
 LUALIB_API int L_GetValue(lua_State *L);
 LUALIB_API int L_InsertEntry(lua_State *L);
+LUALIB_API int L_ID(lua_State *L);
 LUALIB_API int L_Run(lua_State *L);
 LUALIB_API int L_SelectItem(lua_State *L);
 LUALIB_API int L_Set(lua_State *L);
@@ -105,6 +105,7 @@ LUALIB_API int L_SetEntry(lua_State *L);
 LUALIB_API int L_SetHeight(lua_State *L);
 LUALIB_API int L_SetText(lua_State *L);
 LUALIB_API int L_SetTimer(lua_State *L);
+LUALIB_API int L_SetType(lua_State *L);
 LUALIB_API int L_SetValue(lua_State *L);
 LUALIB_API int L_SetWidth(lua_State *L);
 LUALIB_API int L_TakesFocus(lua_State *L);

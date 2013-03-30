@@ -36,7 +36,6 @@ static const luaL_Reg R_newt_functions[] = {
 	
 	{"Init", L_Init},
 	{"Cls", L_Cls},
-	{"Compare", L_Compare},
 	{"WaitForKey", L_WaitForKey},
 	{"ClearKeyBuffer", L_ClearKeyBuffer},
 	{"DrawRootText", L_DrawRootText},
@@ -78,6 +77,7 @@ static const luaL_Reg R_comp_methods[] = {
 	{"Clear", L_Clear},
 	{"Destroy", L_Destroy},
 	{"GetValue", L_GetValue},
+	{"ID", L_ID},
 	{"Run", L_Run},
 	{"Set", L_Set},
 	{"SetText", L_SetText},
@@ -134,6 +134,25 @@ LUALIB_API int luaopen_newt(lua_State *L) {
 	lua_pushinteger(L, NEWT_EXIT_TIMER);
 	lua_setfield(L, -2, "EXIT_TIMER");
 	
+	lua_pushinteger(L, TYPE_FORM);
+	lua_setfield(L, -2, "TYPE_FORM");
+	lua_pushinteger(L, TYPE_UNKNOWN);
+	lua_setfield(L, -2, "TYPE_UNKNOWN");
+	lua_pushinteger(L, TYPE_LABEL);
+	lua_setfield(L, -2, "TYPE_LABEL");
+	lua_pushinteger(L, TYPE_ENTRY);
+	lua_setfield(L, -2, "TYPE_ENTRY");
+	lua_pushinteger(L, TYPE_BUTTON);
+	lua_setfield(L, -2, "TYPE_BUTTON");
+	lua_pushinteger(L, TYPE_CHECKBOX);
+	lua_setfield(L, -2, "TYPE_CHECKBOX");
+	lua_pushinteger(L, TYPE_RADIOBUTTON);
+	lua_setfield(L, -2, "TYPE_RADIOBUTTON");
+	lua_pushinteger(L, TYPE_LISTBOX);
+	lua_setfield(L, -2, "TYPE_LISTBOX");
+	lua_pushinteger(L, TYPE_SCALE);
+	lua_setfield(L, -2, "TYPE_SCALE");
+
 	/* Newt.Component type & methods */
 	luaL_newmetatable(L, TYPE_COMPONENT); 
 	lua_pushvalue(L, -1); 
@@ -160,19 +179,6 @@ LUALIB_API int L_Init(lua_State *L) {
 LUALIB_API int L_Cls(lua_State *L) {
 	newtCls();
 	return 0;
-}
-
-/* Compare(component, component) */
-LUALIB_API int L_Compare(lua_State *L) {
-	component c1;
-	component c2;
-	bool result;
-	result = false;
-	c1 = luaL_checkcomponent(L, 1);
-	c2 = luaL_checkcomponent(L, 2);
-	if (c1->p == c2->p) result = true;
-	lua_pushboolean(L, result);
-	return 1;
 }
 
 /* WaitForKey() */
@@ -549,6 +555,18 @@ LUALIB_API int L_InsertEntry(lua_State *L) {
 	return 0;
 }
 
+/* hex = com:ID() */
+LUALIB_API int L_ID(lua_State *L) {
+	component com;
+	char result[20];
+	
+	com = luaL_checkcomponent(L, 1);
+	sprintf(result, "%p", (void *)(com->p));
+
+	lua_pushstring(L, result);
+	return 1;
+}
+
 /* reason, value = form:Run() */
 LUALIB_API int L_Run(lua_State *L) {
 	component form; 
@@ -587,6 +605,18 @@ LUALIB_API int L_Set(lua_State *L) {
 			return luaL_error(L, "Invalid Method");
 	}
 	return 0;	
+}
+
+/* com = com:SetType(type) */
+LUALIB_API int L_SetType(lua_State *L) {
+	component com;
+	int type;
+	
+	com = luaL_checkcomponent(L, 1);
+	type = luaL_checkinteger(L, 2);
+	
+	lua_pushcomponent(L, com->p, type);
+	return 1;
 }
 
 LUALIB_API int L_SetValue(lua_State *L) {

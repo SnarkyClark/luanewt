@@ -31,12 +31,12 @@ form:Destroy()
 n.Finished()
 
 if r == n.EXIT_COMPONENT then
-	if n.Compare(v, button.ok) then
-		print("Ok!", value)
-	elseif n.Compare(v, button.cancel) then
-		print("Cancel!")
+	if v:ID() == button.ok:ID() then
+		print(v:ID(), "Ok!", value)
+	elseif v:ID() == button.cancel:ID() then
+		print(v:ID(), "Cancel!")
 	else
-		print("????")
+		print(v:ID(), "????")
 	end
 else 
 	print(r, v)
