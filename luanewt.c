@@ -127,14 +127,16 @@ static const luaL_Reg R_comp_methods[] = {
 	{"AddComponents", L_AddComponents},
 	{"Clear", L_Clear},
 	{"Destroy", L_Destroy},
+	{"Draw", L_Draw},
 	{"GetCurrent", L_GetCurrent},
 	{"GetValue", L_GetValue},
 	{"ID", L_ID},
 	{"Run", L_Run},
 	{"Set", L_Set},
 	{"SetText", L_SetText},
+	{"SetType", L_SetType},
 	{"TakesFocus", L_TakesFocus},
-	{"Tag", L_Tag},
+	{"Text", L_Text},
 	
 	{NULL, NULL}
 };
@@ -517,8 +519,20 @@ LUALIB_API int L_Radiobutton(lua_State *L) {
 	return 1;	
 }
 
+/* com = Scale(left, top, width, max) */
 LUALIB_API int L_Scale(lua_State *L) {
-	return 0;
+	int left; int top; 
+	int width; lua_Integer max;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	width = luaL_checkinteger(L, 3);
+	max = luaL_checkinteger(L, 4);
+	
+	result = newtScale(left, top, width, max);
+	lua_pushcomponent(L, result, TYPE_SCALE);
+	return 1;
 }
 
 LUALIB_API int L_VerticalScrollbar(lua_State *L) {
@@ -595,6 +609,15 @@ LUALIB_API int L_Destroy(lua_State *L) {
 	return 0;
 }
 
+/* form:Draw() */
+LUALIB_API int L_Draw(lua_State *L) {
+	component form;
+	form = luaL_checkcomponent(L, 1);
+	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method"); 
+	newtDrawForm(form->p);
+	return 0;
+}
+
 /* com = radiobutton:GetCurrent() */
 LUALIB_API int L_GetCurrent(lua_State *L) {
 	component com;
@@ -617,6 +640,7 @@ LUALIB_API int L_GetNumLines(lua_State *L) {
 }
 
 /* value = entry:GetValue() */
+/* value = checkbox:GetValue() */
 LUALIB_API int L_GetValue(lua_State *L) {
 	component com;
 	char c;
@@ -674,10 +698,12 @@ LUALIB_API int L_SelectItem(lua_State *L) {
 }
 
 /* entry:Set(value, [cursoratend]) */
+/* scale:Set(value) */
 LUALIB_API int L_Set(lua_State *L) {
 	component com;
 	const char *svalue;
 	bool cursoratend;
+	lua_Integer ivalue;
 	
 	com = luaL_checkcomponent(L, 1);
 	switch (com->t) {
@@ -686,6 +712,10 @@ LUALIB_API int L_Set(lua_State *L) {
 			if (lua_gettop(L) < 3) cursoratend = false;
 			else cursoratend = lua_toboolean(L, 3);
 			newtEntrySet(com->p, svalue, cursoratend);
+			break;
+		case TYPE_SCALE:
+			ivalue = luaL_checkinteger(L, 2);
+			newtScaleSet(com->p, ivalue);
 			break;
 		default:
 			return luaL_error(L, "Invalid Method");
@@ -750,8 +780,8 @@ LUALIB_API int L_TakesFocus(lua_State *L) {
 	return 0;
 }
 
-/* tag = com:Tag() */
-LUALIB_API int L_Tag(lua_State *L) {
+/* tag = com:Text() */
+LUALIB_API int L_Text(lua_State *L) {
 	component com;
 	com = luaL_checkcomponent(L, 1);
 	
