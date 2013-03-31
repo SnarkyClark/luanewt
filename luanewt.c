@@ -4,6 +4,22 @@
 
 /** private helper functions **/
 
+/* Lua 5.2.0 compatibility */
+#if !defined LUA_VERSION_NUM || LUA_VERSION_NUM==501
+static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
+  luaL_checkstack(L, nup, "too many upvalues");
+  for (; l->name != NULL; l++) {  /* fill the table with given functions */
+    int i;
+    for (i = 0; i < nup; i++)  /* copy upvalues to the top */
+      lua_pushvalue(L, -nup);
+    lua_pushstring(L, l->name);
+    lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
+    lua_settable(L, -(nup + 3));
+  }
+  lua_pop(L, nup);  /* remove upvalues */
+}
+#endif
+
 /* check and return pointer */ 
 void *luaL_checkpointer(lua_State* L, int i) {
 	luaL_checktype(L, i, LUA_TLIGHTUSERDATA);
@@ -28,6 +44,25 @@ void lua_pushcomponent(lua_State *L, newtComponent com, int type) {
 		lua_pushnil(L);
 	}
 }
+
+/* register component tag */
+void lua_regtag(lua_State *L, newtComponent com, const char *tag) {
+	char id[20];
+	sprintf(id, "newt.%p", (void *)(com));
+	lua_pushstring(L, id);
+	if (tag != NULL) lua_pushstring(L, tag);
+	else lua_pushnil(L);
+	lua_settable(L, LUA_REGISTRYINDEX);
+}
+
+/* push component tag onto Lua stack */
+void lua_pushtag(lua_State *L, newtComponent com) {
+	char id[20];
+	sprintf(id, "newt.%p", (void *)(com));
+	lua_pushstring(L, id);
+	lua_gettable(L, LUA_REGISTRYINDEX);
+}
+
 
 /** module registration **/
 
@@ -76,12 +111,14 @@ static const luaL_Reg R_comp_methods[] = {
 	{"AddComponents", L_AddComponents},
 	{"Clear", L_Clear},
 	{"Destroy", L_Destroy},
+	{"GetCurrent", L_GetCurrent},
 	{"GetValue", L_GetValue},
 	{"ID", L_ID},
 	{"Run", L_Run},
 	{"Set", L_Set},
 	{"SetText", L_SetText},
 	{"TakesFocus", L_TakesFocus},
+	{"Tag", L_Tag},
 	
 	{NULL, NULL}
 };
@@ -90,7 +127,8 @@ static const luaL_Reg R_comp_methods[] = {
 LUALIB_API int luaopen_newt(lua_State *L) {
 	
 	/* register the base functions and module flags */
-	luaL_register(L, "newt", R_newt_functions);
+	/*luaL_register(L, "newt", R_newt_functions);*/
+	luaL_newlib(L, "newt", R_newt_functions);
 	
 	lua_pushliteral(L, MYVERSION);
 	lua_setfield(L, -2, "version");			/** version */
@@ -157,7 +195,8 @@ LUALIB_API int luaopen_newt(lua_State *L) {
 	luaL_newmetatable(L, TYPE_COMPONENT); 
 	lua_pushvalue(L, -1); 
 	lua_setfield(L, -2, "__index");
-	luaL_register(L, NULL, R_comp_methods); 
+	/*luaL_register(L, NULL, R_comp_methods);*/
+	luaL_setfuncs(L, R_comp_methods, 0);
 	lua_pop(L, 1);
 	
 	/* return the library handle */
@@ -325,8 +364,9 @@ LUALIB_API int L_Button(lua_State *L) {
 	left = luaL_checkinteger(L, 1);
 	top = luaL_checkinteger(L, 2);
 	text = luaL_checkstring(L, 3);
-	
+
 	result = newtButton(left, top, text);
+	lua_regtag(L, result, text);
 	lua_pushcomponent(L, result, TYPE_BUTTON);
 	return 1;
 }
@@ -342,6 +382,7 @@ LUALIB_API int L_CompactButton(lua_State *L) {
 	text = luaL_checkstring(L, 3);
 
 	result = newtCompactButton(left, top, text);
+	lua_regtag(L, result, text);
 	lua_pushcomponent(L, result, TYPE_BUTTON);
 	return 1;
 }
@@ -361,6 +402,7 @@ LUALIB_API int L_Checkbox(lua_State *L) {
 	
 	if (checked == false) result = newtCheckbox(left, top, text, ' ', " *", NULL);
 	else result = newtCheckbox(left, top, text, '*', " *", NULL);
+	lua_regtag(L, result, text);
 	lua_pushcomponent(L, result, TYPE_CHECKBOX);
 	return 1;
 }
@@ -454,6 +496,7 @@ LUALIB_API int L_Radiobutton(lua_State *L) {
 	}
 	
 	result = newtRadiobutton(left, top, text, selected, prev);
+	lua_regtag(L, result, text);
 	lua_pushcomponent(L, result, TYPE_RADIOBUTTON);
 	return 1;	
 }
@@ -524,8 +567,15 @@ LUALIB_API int L_Destroy(lua_State *L) {
 
 /* com = radiobutton:GetCurrent() */
 LUALIB_API int L_GetCurrent(lua_State *L) {
-
-	return 0;
+	component com;
+	newtComponent result;
+	
+	com = luaL_checkcomponent(L, 1);
+	if (com->t != TYPE_RADIOBUTTON) return luaL_error(L, "Invalid Method"); 
+	
+	result = newtRadioGetCurrent(com->p);
+	lua_pushcomponent(L, result, TYPE_RADIOBUTTON);
+	return 1;
 }
 
 LUALIB_API int L_GetSelection(lua_State *L) {
@@ -662,6 +712,15 @@ LUALIB_API int L_TakesFocus(lua_State *L) {
 	
 	newtComponentTakesFocus(com->p, val);
 	return 0;
+}
+
+/* tag = com:Tag() */
+LUALIB_API int L_Tag(lua_State *L) {
+	component com;
+	com = luaL_checkcomponent(L, 1);
+	
+	lua_pushtag(L, com->p);
+	return 1;
 }
 
 

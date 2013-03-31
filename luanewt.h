@@ -29,6 +29,14 @@
 #define false 0
 #define true 1
 
+/* Lua 5.2 compatibilty */
+
+#if LUA_VERSION_NUM == 501
+#define luaL_newlib(L, name, l) luaL_register(L, name, l)
+#elif LUA_VERSION_NUM == 502
+#define luaL_newlib(L, name, l) luaL_newlib(L, l)
+#endif 
+
 /** wrapper structs **/
 
 struct com_t {
@@ -109,3 +117,4 @@ LUALIB_API int L_SetType(lua_State *L);
 LUALIB_API int L_SetValue(lua_State *L);
 LUALIB_API int L_SetWidth(lua_State *L);
 LUALIB_API int L_TakesFocus(lua_State *L);
+LUALIB_API int L_Tag(lua_State *L);

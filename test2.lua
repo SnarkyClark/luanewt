@@ -16,25 +16,35 @@ form = n.Form(nil, nil, 0)
 
 label = n.Label(1, 1, "Test Label")
 entry = n.Entry(12, 1, "Test", 20)
+radio = {}
+radio.red = n.Radiobutton(1, 2, "Red", false)
+radio.green = n.Radiobutton(1, 3, "Green", true, radio.red)
+radio.blue = n.Radiobutton(1, 4, "Blue", false, radio.green)
+
 button = {
-	ok = n.Button(10, 3, "Ok"),
-	cancel = n.Button(22, 3, "Cancel")
+	ok = n.Button(10, 5, "Ok"),
+	cancel = n.Button(22, 5, "Cancel")
 }
 
-form:AddComponents(label, entry, button.ok, button.cancel)
+form:AddComponents(label, entry, radio.red, radio.green, radio.blue, button.ok, button.cancel)
 entry:Set("Updated Test", true)
 
 r, v = form:Run()
-value = entry:GetValue()
+value = {
+	entry = entry:GetValue(),
+	radio = radio.red:GetCurrent():Tag()
+}
+
 form:Destroy()
 
 n.Finished()
 
 if r == n.EXIT_COMPONENT then
-	if v:ID() == button.ok:ID() then
-		print(v:ID(), "Ok!", value)
-	elseif v:ID() == button.cancel:ID() then
-		print(v:ID(), "Cancel!")
+	if v:Tag() == 'Ok' then
+		print("Entry: " .. value.entry)
+		print("Radio: " .. value.radio)
+	elseif v:Tag() == 'Cancel' then
+		print("Canceled!")
 	else
 		print(v:ID(), "????")
 	end
