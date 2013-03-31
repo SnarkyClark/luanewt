@@ -10,30 +10,60 @@ n.DrawRootText((cols - #msg) / 2, rows / 2, msg)
 
 n.PushHelpLine(nil)
 
-n.OpenWindow((cols - 40) / 2, (rows - 20) / 2, 40, 20, "Test Form")
+n.OpenWindow((cols - 60) / 2, (rows - 20) / 2, 60, 20, "Test Form")
 
 form = n.Form(nil, nil, 0)
 
-label = n.Label(1, 1, "Test Label")
-entry = n.Entry(12, 1, "Test", 20)
+label = {
+	n.Label(1, 1, "   Name"),
+	n.Label(1, 2, "Street1"),
+	n.Label(1, 3, "Street2"),
+	n.Label(1, 4, "   City"), n.Label(35, 4, "State"), n.Label(44, 4, "Zip")
+}
+
+entry = {
+	n.Entry(9, 1, "John Doe", 35),
+	n.Entry(9, 2, "1234 Any Street", 50),
+	n.Entry(9, 3, nil, 50),
+	n.Entry(9, 4, "Any Town", 25), n.Entry(41, 4, "WA", 2), n.Entry(48, 4, "98000", 10)
+}
+
 radio = {}
-radio.red = n.Radiobutton(1, 2, "Red", false)
-radio.green = n.Radiobutton(1, 3, "Green", true, radio.red)
-radio.blue = n.Radiobutton(1, 4, "Blue", false, radio.green)
+radio[1] = n.Radiobutton(1, 6, "Red", false)
+radio[2] = n.Radiobutton(1, 7, "Green", true, radio[1])
+radio[3] = n.Radiobutton(1, 8, "Blue", false, radio[2])
+
+check = {
+	n.Checkbox(15, 6, "Option A"),
+	n.Checkbox(15, 7, "Option B"),
+	n.Checkbox(15, 8, "Option C")	
+}
 
 button = {
-	ok = n.Button(10, 5, "Ok"),
-	cancel = n.Button(22, 5, "Cancel")
+	n.Button(21, 16, "Ok"),
+	n.Button(29, 16, "Cancel")
 }
 
-form:AddComponents(label, entry, radio.red, radio.green, radio.blue, button.ok, button.cancel)
-entry:Set("Updated Test", true)
+form:AddComponents(label, entry, radio, check, button)
 
 r, v = form:Run()
+
 value = {
-	entry = entry:GetValue(),
-	radio = radio.red:GetCurrent():Tag()
+	name = entry[1]:GetValue(),
+	street1 = entry[2]:GetValue(),
+	street2 = entry[3]:GetValue(),
+	city = entry[4]:GetValue(),
+	state = entry[5]:GetValue(),
+	zip = entry[6]:GetValue(),
+	radio = radio[1]:GetCurrent():Tag(),
+	option = {
+		a = check[1]:GetValue(),
+		b = check[2]:GetValue(),
+		c = check[3]:GetValue()
+	}
 }
+
+if value.street2 == '' then value.street2 = nil end
 
 form:Destroy()
 
@@ -41,8 +71,16 @@ n.Finished()
 
 if r == n.EXIT_COMPONENT then
 	if v:Tag() == 'Ok' then
-		print("Entry: " .. value.entry)
-		print("Radio: " .. value.radio)
+		print(value.name)
+		print(value.street1)
+		if value.street2 then print(value.street2) end
+		print(value.city .. ', ' .. value.state .. '  ' .. value.zip)
+		print('Color: ' .. value.radio)
+		local option = {}
+		if value.option.a then table.insert(option, 'A') end
+		if value.option.b then table.insert(option, 'B') end
+		if value.option.c then table.insert(option, 'C') end
+		print('Options: ' .. table.concat(option, ', '))
 	elseif v:Tag() == 'Cancel' then
 		print("Canceled!")
 	else

@@ -6,21 +6,37 @@
 
 /* Lua 5.2.0 compatibility */
 #if !defined LUA_VERSION_NUM || LUA_VERSION_NUM==501
+
 static void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
-  luaL_checkstack(L, nup, "too many upvalues");
-  for (; l->name != NULL; l++) {  /* fill the table with given functions */
-    int i;
-    for (i = 0; i < nup; i++)  /* copy upvalues to the top */
-      lua_pushvalue(L, -nup);
-    lua_pushstring(L, l->name);
-    lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
-    lua_settable(L, -(nup + 3));
-  }
-  lua_pop(L, nup);  /* remove upvalues */
+	luaL_checkstack(L, nup, "too many upvalues");
+	for (; l->name != NULL; l++) {  /* fill the table with given functions */
+		int i;
+		for (i = 0; i < nup; i++)  /* copy upvalues to the top */
+			lua_pushvalue(L, -nup);
+		lua_pushstring(L, l->name);
+		lua_pushcclosure(L, l->func, nup);  /* closure with those upvalues */
+		lua_settable(L, -(nup + 3));
+	}
+	lua_pop(L, nup);  /* remove upvalues */
 }
+
+LUALIB_API void *luaL_testudata (lua_State *L, int ud, const char *tname) {
+	void *p = lua_touserdata(L, ud);
+	if (p != NULL) {  /* value is a userdata? */
+		if (lua_getmetatable(L, ud)) {  /* does it have a metatable? */
+			luaL_getmetatable(L, tname);  /* get correct metatable */
+			if (!lua_rawequal(L, -1, -2))  /* not the same? */
+			p = NULL;  /* value is a userdata with wrong metatable */
+			lua_pop(L, 2);  /* remove both metatables */
+			return p;
+		}
+	}
+	return NULL;  /* value is not a userdata with a metatable */
+}
+
 #endif
 
-/* check and return pointer */ 
+/* check and return pointer */
 void *luaL_checkpointer(lua_State* L, int i) {
 	luaL_checktype(L, i, LUA_TLIGHTUSERDATA);
 	return lua_touserdata(L, i);
@@ -518,16 +534,30 @@ LUALIB_API int L_AddCallback(lua_State *L) {
 
 /* AddComponents(com, ...) */
 LUALIB_API int L_AddComponents(lua_State *L) {
-	int i;
+	int argi; int argc;
 	component form;
 	component com;
 	form = luaL_checkcomponent(L, 1);
-	com = luaL_checkcomponent(L, 2);
 	if (form->t != TYPE_FORM) return luaL_error(L, "Invalid Method");
-	newtFormAddComponent(form->p, com->p);
-	for (i = 3; i <= lua_gettop(L); i++) {
-		com = luaL_checkcomponent(L, i);
-		newtFormAddComponent(form->p, com->p);
+	argc = lua_gettop(L);
+	argi = 2;
+	while ((argc > 1) && (argi <= argc)) {
+		if ((lua_type(L, argi) == LUA_TUSERDATA) && (luaL_testudata(L, argi, TYPE_COMPONENT) != NULL)) {
+			com = lua_toncom(L, argi);
+			newtFormAddComponent(form->p, com->p);
+		} else if (lua_type(L, argi) == LUA_TTABLE) {
+			/* iterate through the array */
+			lua_pushnil(L);  /* first key */
+			while (lua_next(L, argi) != 0) {
+				if ((lua_type(L, -1) == LUA_TUSERDATA) && (luaL_testudata(L, -1, TYPE_COMPONENT) != NULL)) {
+					com = lua_toncom(L, -1);
+					newtFormAddComponent(form->p, com->p);
+				}
+				/* removes 'value'; keeps 'key' for next iteration */
+				lua_pop(L, 1);
+			}
+		}
+		argi++;
 	}
 	return 0;
 }
@@ -589,11 +619,17 @@ LUALIB_API int L_GetNumLines(lua_State *L) {
 /* value = entry:GetValue() */
 LUALIB_API int L_GetValue(lua_State *L) {
 	component com;
-
+	char c;
+	
 	com = luaL_checkcomponent(L, 1);
 	switch (com->t) {
 		case TYPE_ENTRY:
 			lua_pushstring(L, newtEntryGetValue(com->p));
+			break;
+		case TYPE_CHECKBOX:
+			c = newtCheckboxGetValue(com->p);
+			if (c == ' ') lua_pushboolean(L, false);
+			else lua_pushboolean(L, true);
 			break;
 		default:
 			return luaL_error(L, "Invalid Method");
