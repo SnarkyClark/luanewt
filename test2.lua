@@ -10,9 +10,8 @@ n.DrawRootText((cols - #msg) / 2, rows / 2, msg)
 
 n.PushHelpLine(nil)
 
-n.OpenWindow((cols - 60) / 2, (rows - 20) / 2, 60, 20, "Test Form")
-
-form = n.Form(nil, nil, 0)
+n.CenteredWindow(60, 20, "Test Form")
+form = n.Form()
 
 label = {
 	n.Label(1, 1, "   Name"),
@@ -55,7 +54,7 @@ value = {
 	city = entry[4]:GetValue(),
 	state = entry[5]:GetValue(),
 	zip = entry[6]:GetValue(),
-	radio = radio[1]:GetCurrent():Tag(),
+	radio = radio[1]:GetCurrent():Text(),
 	option = {
 		a = check[1]:GetValue(),
 		b = check[2]:GetValue(),
@@ -67,10 +66,36 @@ if value.street2 == '' then value.street2 = nil end
 
 form:Destroy()
 
+if r == n.EXIT_COMPONENT and v and v:Text() == 'Ok' then
+	
+	n.PopWindow()
+
+	n.CenteredWindow(40, 5, "Progress")
+	form = n.Form()
+	label = {
+		n.Label(9, 1, "Processing Information"),
+		n.Label(16, 2, " Step 1 ")
+	}
+	scale = n.Scale(1, 4, 38, 5)
+	form:AddComponents(label)
+	form:Draw()
+	
+	for i = 1, 5 do
+		scale:Set(i)
+		label[2]:SetText(string.format(" Step %d ", i))
+		n.Refresh()
+		os.execute('sleep 1')
+	end
+	
+	form:Destroy()
+	n.PopWindow()
+	
+end
+
 n.Finished()
 
 if r == n.EXIT_COMPONENT then
-	if v:Tag() == 'Ok' then
+	if v:Text() == 'Ok' then
 		print(value.name)
 		print(value.street1)
 		if value.street2 then print(value.street2) end
@@ -81,7 +106,7 @@ if r == n.EXIT_COMPONENT then
 		if value.option.b then table.insert(option, 'B') end
 		if value.option.c then table.insert(option, 'C') end
 		print('Options: ' .. table.concat(option, ', '))
-	elseif v:Tag() == 'Cancel' then
+	elseif v:Text() == 'Cancel' then
 		print("Canceled!")
 	else
 		print(v:ID(), "????")
