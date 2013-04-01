@@ -277,7 +277,8 @@ LUALIB_API int L_OpenWindow(lua_State *L) {
 		title = luaL_checkstring(L, 5);
 	}
 	result = newtOpenWindow(left, top, width, height, title);
-	return 0;
+	lua_pushboolean(L, result);
+	return 1;
 }
 
 /* bool newtCenteredWindow(width, height, [title]) */
@@ -292,7 +293,8 @@ LUALIB_API int L_CenteredWindow(lua_State *L) {
 	else title = luaL_checkstring(L, 3);
 
 	result = newtCenteredWindow(width, height, title);
-	return 0;
+	lua_pushboolean(L, result);
+	return 1;
 }
 
 /* PopWindow() */
@@ -430,7 +432,6 @@ LUALIB_API int L_Entry(lua_State *L) {
 	int left; int top;
 	const char *value;
 	int width; int flags;
-	const char *tag;
 	newtComponent result;
 	
 	left = luaL_checkinteger(L, 1);
