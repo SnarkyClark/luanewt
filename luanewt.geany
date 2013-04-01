@@ -1,0 +1,36 @@
+
+[indentation]
+indent_width=4
+indent_type=1
+indent_hard_tab_width=8
+detect_indent=false
+detect_indent_width=false
+indent_mode=2
+
+[project]
+name=LuaNewt
+base_path=/home/stefan/Projects/luanewt
+description=
+file_patterns=
+
+[long line marker]
+long_line_behaviour=1
+long_line_column=72
+
+[files]
+current_page=0
+FILE_NAME_0=101;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.c;0;4
+FILE_NAME_1=0;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.h;0;4
+FILE_NAME_2=0;Make;0;16;1;1;0;/home/stefan/Projects/luanewt/Makefile;0;4
+FILE_NAME_3=0;Lua;0;16;1;1;0;/home/stefan/Projects/luanewt/test2.lua;0;4
+
+[VTE]
+last_dir=/home/stefan
+
+[build-menu]
+NF_02_LB=Clean
+NF_02_CM=make clean
+NF_02_WD=
+NF_03_LB=
+NF_03_CM=
+NF_03_WD=
