@@ -134,6 +134,7 @@ static const luaL_Reg R_comp_methods[] = {
 	{"Run", L_Run},
 	{"Set", L_Set},
 	{"SetText", L_SetText},
+	{"SetTimer", L_SetTimer},
 	{"SetType", L_SetType},
 	{"TakesFocus", L_TakesFocus},
 	{"Text", L_Text},
@@ -748,7 +749,22 @@ LUALIB_API int L_SetHeight(lua_State *L) {
 	return 0;
 }
 
+/* form:SetTimer(millisecs) */
 LUALIB_API int L_SetTimer(lua_State *L) {
+	component com;
+	int period;
+	
+	com = luaL_checkcomponent(L, 1);
+	period = luaL_checkinteger(L, 1);
+	
+	switch (com->t) {
+		case TYPE_FORM:
+			newtFormSetTimer(com->p, period);
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
+	
 	return 0;
 }
 
