@@ -19,13 +19,13 @@ long_line_column=72
 
 [files]
 current_page=0
-FILE_NAME_0=101;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.c;0;4
-FILE_NAME_1=0;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.h;0;4
+FILE_NAME_0=18664;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.c;0;4
+FILE_NAME_1=3411;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.h;0;4
 FILE_NAME_2=0;Make;0;16;1;1;0;/home/stefan/Projects/luanewt/Makefile;0;4
 FILE_NAME_3=0;Lua;0;16;1;1;0;/home/stefan/Projects/luanewt/test2.lua;0;4
 
 [VTE]
-last_dir=/home/stefan
+last_dir=/home/stefan/Projects/luanewt
 
 [build-menu]
 NF_02_LB=Clean

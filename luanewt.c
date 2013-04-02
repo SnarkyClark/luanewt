@@ -755,7 +755,7 @@ LUALIB_API int L_SetTimer(lua_State *L) {
 	int period;
 	
 	com = luaL_checkcomponent(L, 1);
-	period = luaL_checkinteger(L, 1);
+	period = luaL_checkinteger(L, 2);
 	
 	switch (com->t) {
 		case TYPE_FORM:
