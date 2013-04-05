@@ -1,4 +1,3 @@
-package.cpath = package.cpath .. ";./Debug/?.so"
 local n = require('newt')
 
 n.Init()
@@ -39,8 +38,8 @@ check = {
 }
 
 button = {
-	n.Button(21, 16, "Ok"),
-	n.Button(29, 16, "Cancel")
+	n.Button(16, 16, "[ESC] Cancel"),
+	n.Button(34, 16, "[F12] Next")
 }
 
 form:AddComponents(label, entry, radio, check, button)
@@ -66,7 +65,8 @@ if value.street2 == '' then value.street2 = nil end
 
 form:Destroy()
 
-if r == n.EXIT_COMPONENT and v and v:Text() == 'Ok' then
+if (r == n.EXIT_COMPONENT and v and v:Text() == '[F12] Next')
+	or (r == n.EXIT_HOTKEY and v == n.KEY_F12) then
 	
 	n.PopWindow()
 
@@ -95,7 +95,7 @@ end
 n.Finished()
 
 if r == n.EXIT_COMPONENT then
-	if v:Text() == 'Ok' then
+	if v:Text() == 'Next' then
 		print(value.name)
 		print(value.street1)
 		if value.street2 then print(value.street2) end
