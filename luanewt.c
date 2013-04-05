@@ -125,6 +125,8 @@ static const luaL_Reg R_newt_functions[] = {
 static const luaL_Reg R_comp_methods[] = {
 
 	{"AddComponents", L_AddComponents},
+	{"AddHotKey", L_AddHotKey},
+	{"AppendEntry", L_AppendEntry},
 	{"Clear", L_Clear},
 	{"Destroy", L_Destroy},
 	{"Draw", L_Draw},
@@ -190,6 +192,39 @@ LUALIB_API int luaopen_newt(lua_State *L) {
 	lua_setfield(L, -2, "EXIT_FDREADY");
 	lua_pushinteger(L, NEWT_EXIT_TIMER);
 	lua_setfield(L, -2, "EXIT_TIMER");
+
+
+	lua_pushinteger(L, NEWT_KEY_ESCAPE);
+	lua_setfield(L, -2, "KEY_ESCAPE");
+	lua_pushinteger(L, NEWT_KEY_PGDN);
+	lua_setfield(L, -2, "KEY_PGDN");
+	lua_pushinteger(L, NEWT_KEY_PGUP);
+	lua_setfield(L, -2, "KEY_PGUP");
+
+	lua_pushinteger(L, NEWT_KEY_F1);
+	lua_setfield(L, -2, "KEY_F1");
+	lua_pushinteger(L, NEWT_KEY_F2);
+	lua_setfield(L, -2, "KEY_F2");
+	lua_pushinteger(L, NEWT_KEY_F3);
+	lua_setfield(L, -2, "KEY_F3");
+	lua_pushinteger(L, NEWT_KEY_F4);
+	lua_setfield(L, -2, "KEY_F4");
+	lua_pushinteger(L, NEWT_KEY_F5);
+	lua_setfield(L, -2, "KEY_F5");
+	lua_pushinteger(L, NEWT_KEY_F6);
+	lua_setfield(L, -2, "KEY_F6");
+	lua_pushinteger(L, NEWT_KEY_F7);
+	lua_setfield(L, -2, "KEY_F7");
+	lua_pushinteger(L, NEWT_KEY_F8);
+	lua_setfield(L, -2, "KEY_F8");
+	lua_pushinteger(L, NEWT_KEY_F9);
+	lua_setfield(L, -2, "KEY_F9");
+	lua_pushinteger(L, NEWT_KEY_F10);
+	lua_setfield(L, -2, "KEY_F10");
+	lua_pushinteger(L, NEWT_KEY_F11);
+	lua_setfield(L, -2, "KEY_F11");
+	lua_pushinteger(L, NEWT_KEY_F12);
+	lua_setfield(L, -2, "KEY_F12");
 	
 	lua_pushinteger(L, TYPE_FORM);
 	lua_setfield(L, -2, "TYPE_FORM");
@@ -490,8 +525,21 @@ LUALIB_API int L_TextboxReflowed(lua_State *L) {
 	return 0;
 }
 
+/* list = Listbox(left, top, height, flags) */
 LUALIB_API int L_Listbox(lua_State *L) {
-	return 0;
+	int left; int top;
+	int height; int flags;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	height = luaL_checkinteger(L, 3);
+	if (lua_gettop(L) < 4 || lua_isnil(L, 4) == 1) flags = 0;		
+	else flags = luaL_checkinteger(L, 4);
+	
+	result = newtListbox(left, top, height, flags);
+	lua_pushcomponent(L, result, TYPE_LISTBOX);
+	return 1;
 }
 
 /* com = Radiobutton(left, top, text, [selected], [prev]) */
@@ -578,11 +626,60 @@ LUALIB_API int L_AddComponents(lua_State *L) {
 	return 0;
 }
 
+/* form:AddHotKey(key) */
+/* form:AddHotKey({key, ...}) */
 LUALIB_API int L_AddHotKey(lua_State *L) {
+	component com;
+	int key;
+	
+	com = luaL_checkcomponent(L, 1);
+	if (com->t != TYPE_FORM) return luaL_error(L, "Invalid Method");
+	if (lua_type(L, 2) == LUA_TTABLE) {
+		/* iterate through the array */
+		lua_pushnil(L);  /* first key */
+		while (lua_next(L, 2) != 0) {
+			key = luaL_checkinteger(L, -1);
+			newtFormAddHotKey(com->p, key);
+			/* removes 'value'; keeps 'key' for next iteration */
+			lua_pop(L, 1);
+		}
+	} else {
+		key = luaL_checkinteger(L, 2);
+		newtFormAddHotKey(com->p, key);
+	}
+	
 	return 0;
 }
 
+/* listbox:AppendEntry(text, [index]) */
+/* listbox:AppendEntry({text, text}, [startindex]) */
 LUALIB_API int L_AppendEntry(lua_State *L) {
+	component com;
+	const char *text;
+	size_t key;
+	
+	com = luaL_checkcomponent(L, 1);
+	if (com->t != TYPE_LISTBOX) return luaL_error(L, "Invalid Method");
+	if (lua_gettop(L) < 3 || lua_isnil(L, 3) == 1) 
+		/* hack for newtListItemCount */
+		key = ((struct listbox *)com->p->data)->numItems + 1;
+	else key = luaL_checkinteger(L, 3);
+
+	if (lua_type(L, 2) == LUA_TTABLE) {
+		/* iterate through the array */
+		lua_pushnil(L);  /* first key */
+		while (lua_next(L, 2) != 0) {
+			text = luaL_checkstring(L, -1);
+			newtListboxAppendEntry(com->p, text, (const void *)key);
+			/* removes 'value'; keeps 'key' for next iteration */
+			lua_pop(L, 1);
+			key++;
+		}
+	} else {
+		text = luaL_checkstring(L, 2);
+		newtListboxAppendEntry(com->p, text, (const void *)key);
+	}
+
 	return 0;
 }
 
@@ -623,13 +720,23 @@ LUALIB_API int L_Draw(lua_State *L) {
 /* com = radiobutton:GetCurrent() */
 LUALIB_API int L_GetCurrent(lua_State *L) {
 	component com;
-	newtComponent result;
+	size_t iresult;
+	newtComponent cresult;
 	
 	com = luaL_checkcomponent(L, 1);
-	if (com->t != TYPE_RADIOBUTTON) return luaL_error(L, "Invalid Method"); 
+	switch (com->t) {
+		case TYPE_RADIOBUTTON:
+			cresult = newtRadioGetCurrent(com->p);
+			lua_pushcomponent(L, cresult, TYPE_RADIOBUTTON);
+			break;
+		case TYPE_LISTBOX:
+			iresult = (size_t)newtListboxGetCurrent(com->p);
+			lua_pushinteger(L, iresult);
+			break;
+		default:
+			return luaL_error(L, "Invalid Method");
+	}
 	
-	result = newtRadioGetCurrent(com->p);
-	lua_pushcomponent(L, result, TYPE_RADIOBUTTON);
 	return 1;
 }
 

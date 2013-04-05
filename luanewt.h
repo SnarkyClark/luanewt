@@ -37,6 +37,43 @@
 #define luaL_newlib(L, name, l) luaL_newlib(L, l)
 #endif 
 
+/* libnewt internals - very naughty */
+
+struct newtComponent_struct {
+    /* common data */
+    int height, width;
+    int top, left;
+    int takesFocus;
+    int isMapped;
+
+    struct componentOps * ops;
+
+    newtCallback callback;
+    void * callbackData;
+
+    newtCallback destroyCallback;
+    void * destroyCallbackData;
+
+    void * data;
+};
+
+/* Holds all the relevant information for this listbox */
+struct listbox {
+    newtComponent sb; 
+    int curWidth;	
+    int curHeight;	
+    int sbAdjust;
+    int bdxAdjust, bdyAdjust;
+    int numItems, numSelected;
+    int userHasSetWidth;
+    int currItem, startShowItem; 
+    int isActive; 
+    struct items *boxItems;
+    int grow;
+    int flags; 
+};
+
+
 /** wrapper structs **/
 
 struct com_t {
