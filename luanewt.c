@@ -517,8 +517,23 @@ LUALIB_API int L_Label(lua_State *L) {
 	return 1;
 }
 
+/* textbox = Textbox(left, top, width, height, [flags]) */
 LUALIB_API int L_Textbox(lua_State *L) {
-	return 0;
+	int left; int top;
+	int width; int height;
+	int flags;
+	newtComponent result;
+	
+	left = luaL_checkinteger(L, 1);
+	top = luaL_checkinteger(L, 2);
+	width = luaL_checkinteger(L, 3);
+	height = luaL_checkinteger(L, 4);
+	if (lua_gettop(L) < 5 || lua_isnil(L, 5) == 1) flags = 0;		
+	else flags = luaL_checkinteger(L, 5);
+	
+	result = newtTextbox(left, top, width, height, flags);
+	lua_pushcomponent(L, result, TYPE_TEXTBOX);
+	return 1;
 }
 
 LUALIB_API int L_TextboxReflowed(lua_State *L) {
@@ -883,6 +898,9 @@ LUALIB_API int L_SetText(lua_State *L) {
 	text = luaL_checkstring(L, 2);
 	switch (com->t) {
 		case TYPE_LABEL:
+			newtLabelSetText(com->p, text);
+			break;
+		case TYPE_TEXTBOX:
 			newtLabelSetText(com->p, text);
 			break;
 		default:

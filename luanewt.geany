@@ -18,12 +18,11 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=4
+current_page=3
 FILE_NAME_0=16741;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.c;0;4
 FILE_NAME_1=3278;C;0;16;1;1;0;/home/stefan/Projects/luanewt/luanewt.h;0;4
 FILE_NAME_2=0;Make;0;16;1;1;0;/home/stefan/Projects/luanewt/Makefile;0;4
-FILE_NAME_3=887;Lua;0;16;1;1;0;/home/stefan/Projects/luanewt/test3.lua;0;4
-FILE_NAME_4=1039;Lua;0;16;1;1;0;/home/stefan/Projects/luanewt/test2.lua;0;4
+FILE_NAME_3=1177;Lua;0;16;1;1;0;/home/stefan/Projects/luanewt/test3.lua;0;4
 
 [VTE]
 last_dir=/home/stefan/Projects/luanewt

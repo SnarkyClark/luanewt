@@ -21,6 +21,7 @@
 #define TYPE_RADIOBUTTON 5
 #define TYPE_LISTBOX 6
 #define TYPE_SCALE 7
+#define TYPE_TEXTBOX 8
 
 #define lua_newncom(L) ((component)(lua_newuserdata(L, sizeof(struct com_t))))
 #define lua_toncom(L, i) ((component)(lua_touserdata(L, i)))
