@@ -901,7 +901,7 @@ LUALIB_API int L_SetText(lua_State *L) {
 			newtLabelSetText(com->p, text);
 			break;
 		case TYPE_TEXTBOX:
-			newtLabelSetText(com->p, text);
+			newtTextboxSetText(com->p, text);
 			break;
 		default:
 			return luaL_error(L, "Invalid Method");
