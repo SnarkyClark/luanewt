@@ -196,6 +196,8 @@ LUALIB_API int luaopen_newt(lua_State *L) {
 
 	lua_pushinteger(L, NEWT_KEY_ESCAPE);
 	lua_setfield(L, -2, "KEY_ESCAPE");
+	lua_pushinteger(L, NEWT_KEY_RETURN);
+	lua_setfield(L, -2, "KEY_RETURN");
 	lua_pushinteger(L, NEWT_KEY_PGDN);
 	lua_setfield(L, -2, "KEY_PGDN");
 	lua_pushinteger(L, NEWT_KEY_PGUP);
