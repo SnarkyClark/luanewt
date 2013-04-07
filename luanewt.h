@@ -109,6 +109,9 @@ LUALIB_API int L_Suspend(lua_State *L);
 LUALIB_API int L_Resume(lua_State *L);
 LUALIB_API int L_SetSuspendCallback(lua_State *L);
 LUALIB_API int L_Bell(lua_State *L);
+LUALIB_API int L_CursorOff(lua_State *L);
+LUALIB_API int L_CursorOn(lua_State *L);
+LUALIB_API int L_Delay(lua_State *L);
 LUALIB_API int L_GetScreenSize(lua_State *L);
 LUALIB_API int L_ReflowText(lua_State *L);
 

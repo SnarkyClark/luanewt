@@ -102,6 +102,9 @@ static const luaL_Reg R_newt_functions[] = {
 	{"Resume", L_Resume},
 	{"SetSuspendCallback", L_SetSuspendCallback},
 	{"Bell", L_Bell},
+	{"CursorOff", L_CursorOff},
+	{"CursorOn", L_CursorOn},
+	{"Delay", L_Delay},
 	{"GetScreenSize", L_GetScreenSize},
 	{"ReflowText", L_ReflowText},
 	
@@ -395,6 +398,26 @@ LUALIB_API int L_SetSuspendCallback(lua_State *L) {
 /* Bell() */
 LUALIB_API int L_Bell(lua_State *L) {
 	newtBell();
+	return 0;
+}
+
+/* CursorOff() */
+LUALIB_API int L_CursorOff(lua_State *L) {
+	newtCursorOff();
+	return 0;
+}
+
+/* CursorOn() */
+LUALIB_API int L_CursorOn(lua_State *L) {
+	newtCursorOn();
+	return 0;
+}
+
+/* Delay() */
+LUALIB_API int L_Delay(lua_State *L) {
+	int msec;
+	msec = luaL_checkinteger(L, 1);
+	newtDelay(msec * 1000);
 	return 0;
 }
 
